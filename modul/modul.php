@@ -568,6 +568,69 @@ function processUpdateUser ($arr=array(), $post)
 	}
 }
 
+function processUpdateBuku ($arr=array(), $post)
+{
+	if (isset($post)){
+	
+		extract($arr, EXTR_PREFIX_SAME, "wddx");
+
+		// periksa jika nama file foto ada
+		// jika tidak maka gunakan foto yang lama
+		/*if(!empty($nama_file))
+		{
+			echo "masuk ke fungsi pengisian data..";
+
+			// Baca lokasi file sementar dan nama file dari form (fupload)
+			$lokasi_file = $_FILES['foto']['tmp_name'];
+			
+			// dimodifikasi dari file asli
+			// dimana nama file foto disimpan ke dalam database
+			// menggunakan bilangan random tmbah extension
+
+			$tipe_file = pathinfo($nama_file, PATHINFO_EXTENSION); // original
+			$num_file_foto = rand(10000,99999);
+			$file_foto = $num_file_foto . "." . $tipe_file;
+		
+			// Tentukan folder untuk menyimpan file
+			$folder = "../images/$file_foto";
+
+			if (move_uploaded_file($lokasi_file,"$folder")){
+				// susun penamaan file lama
+				$file_lama = "../images/" . $foto_awal;
+
+				// hapus file yang lama
+				unlink($file_lama);
+			}
+
+		}else{
+			// devinisi variabel file_foto dengan foto awal
+			$file_foto=$foto_awal;
+		}*/
+	
+		// periksa apakah data id_anggota, nama dan alamat tidak kosong
+		//if (!empty($idbuku) && !empty($judulbuku) && 
+				//!empty($kategroi))
+		//{
+			// lakukan proses perubahan data ke database
+			mysqli_query(getConnection(),
+				"UPDATE tbbuku 
+					SET 
+						judulbuku='$judulbuku',
+						kategori='$kategori',
+						pengarang='$pengarang',
+						penerbit='$penerbit'
+					WHERE 
+						idbuku='$idbuku'"
+			);	
+		//}
+
+		// pindah ke halamana index.php
+		// dengan variabel anggota dan halaman
+
+		header("location:../index.php?p=buku&hal=$page");
+	}
+}
+
 function processDeleteUser ($id)
 {
 	// untuk menghapus data maka hapus terlebih dahulu
@@ -621,6 +684,33 @@ function getUserForUpdate ($get)
 					"alamat"=>$r_tampil_anggota['alamat'], 
 					"status"=>$r_tampil_anggota['status'], 
 					"foto"=>$foto, 
+					"page"=>$hal);
+
+	return $arr;
+}
+function getBukuForUpdate ($get)
+{
+	//$idbuku=$id;//
+
+	extract($get);
+ 	
+	$q_tampil_buku = mysqli_query(getConnection(),
+		"SELECT * FROM tbbuku WHERE idbuku='$id'"); //Fixed
+
+	$r_tampil_buku=mysqli_fetch_array($q_tampil_buku);
+	
+	/*if(empty($r_tampil_anggota['foto'])or($r_tampil_anggota['foto']=='-'))
+	{
+		$foto = "admin-no-photo.jpg";		
+	}else{
+		$foto = $r_tampil_anggota['foto'];
+	}*/
+
+	$arr = array(	"idbuku"=>$r_tampil_buku['idbuku'], 
+					"judulbuku"=>$r_tampil_buku['judulbuku'], 
+					"kategori"=>$r_tampil_buku['kategori'], 
+					"pengarang"=>$r_tampil_buku['pengarang'], 
+					"penerbit"=>$r_tampil_buku['penerbit'], 
 					"page"=>$hal);
 
 	return $arr;

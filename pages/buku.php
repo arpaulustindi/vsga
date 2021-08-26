@@ -11,10 +11,10 @@
 				<a href="index.php?p=buku-input" class="btn btn-primary">Tambah Buku
 				</a>
 			</div>
-			<div class="btn-group">
+			<!--<div class="btn-group">
 				<a href="pages/cetak.php" target="_blank" class="btn btn-primary">Cetak Buku
 				</a>
-			</div>
+			</div>-->
 		</div>
 		<div class="col-3 justify-content-end">
 			<form class="form-inline" method="POST">

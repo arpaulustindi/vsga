@@ -338,7 +338,7 @@ function getTampilBuku($pg, $req)
 			echo "<td>";
 			
 			echo "<div class='btn-group btn-group-sm'>";
-			echo "<a href=pages/cetak_kartu.php?id=$r_tampil_buku[idbuku]  target=_blank class='btn btn-outline-info' role='button'>Cetak Buku</a>";
+			//echo "<a href=pages/cetak_kartu.php?id=$r_tampil_buku[idbuku]  target=_blank class='btn btn-outline-info' role='button'>Cetak Buku</a>";
 
 			echo "<a href=index.php?p=buku-edit&id=$r_tampil_buku[idbuku]&hal=$hal class='btn btn-outline-success' role='button'>Edit</a>";
 			
@@ -659,6 +659,36 @@ function processDeleteUser ($id)
 	header("location:../index.php?p=anggota");
 	
 }
+
+function processDeleteBuku ($id)
+{
+	// untuk menghapus data maka hapus terlebih dahulu
+	// file foto yang sudah tidak dipakai
+	// ambil dahulu nama file
+	$qdel = mysqli_query(getConnection(), "select * from tbbuku where idbuku='$id'");
+	$result = mysqli_fetch_array($qdel);
+	//$nama_foto = $result['foto'];
+
+	//$file_path = "../images/" . $nama_foto;
+
+	// jika file foto ada maka segera dihapus 
+	/*if ($nama_foto != "-")
+	{
+		if (unlink($file_path)){
+			// jika file berhasil dihapus 
+			// maka hapus database yang bersesuai
+			mysqli_query(getConnection(), "DELETE FROM tbanggota WHERE idanggota='$id'");
+		}	
+	}else{
+		// jika ternyata tidak ada gambar
+		// maka cukup dihapus databasenya saja
+		
+	}*/
+	mysqli_query(getConnection(), "DELETE FROM tbbuku WHERE idbuku='$id'");
+	header("location:../index.php?p=buku");
+	
+}
+
 
 function getUserForUpdate ($get)
 {

@@ -400,6 +400,164 @@ function getTampilBuku($pg, $req)
 		echo "</div>";
 	}
 }
+function getTampilTransaksiPeminjaman($pg, $req)
+{
+	echo "<table class='table table-striped table-sm'>";
+	echo "<thead class='thead-dark'>";
+	echo "<tr>";
+	echo "<th>No</th>";
+	//echo "<th>&nbsp;</th>";
+	echo "<th>Anggota</th>";
+	echo "<th>Judul Buku</th>";
+	echo "<th>Tgl. Peminjaman</th>";
+	echo "<th>Tgl. Pengembalian</th>";
+	echo "<th>Status</th>";
+	echo "<th>Opsi</th>";
+	echo "</tr>";
+	echo "</thead>";
+	echo "<tbody>";
+
+	$batas = 5;
+
+	extract($pg);
+
+	if(empty($hal)){
+		$posisi = 0;
+		$hal = 1;
+		$nomor = 1;
+	}else {
+		$posisi = ($hal - 1) * $batas;
+		$nomor = $posisi+1;
+	}	
+
+	// periksa apakah yang masuk adalah Paramter POST
+	// jika benar maka buat buat query
+	$_sql = "SELECT                                
+					t.idtransaksi AS idtransaksi, 
+					t.idanggota AS idanggota,
+					a.nama AS namaanggota,
+					t.idbuku AS idbuku,
+					b.judulbuku AS judulbuku,
+					t.tglpinjam AS tglpinjam,
+					t.tglkembali AS tglkembali
+				FROM
+					tbtransaksi t,
+					tbanggota a,
+					tbbuku b
+				WHERE
+					a.idanggota = (SELECT t.idanggota)
+					AND
+					b.idbuku = (SELECT b.idbuku)";
+	if($req == "POST")
+	{
+		$pencarian = trim(mysqli_real_escape_string(getConnection(), htmlentities($_POST['pencarian'], ENT_QUOTES)));
+		
+		if($pencarian != ""){
+			$sql = $_sql." OR
+							a.nama LIKE '%$pencarian%'
+								OR 
+							b.judulbuku LIKE '%$pencarian%'";
+				
+			$query = $sql;
+			$queryJml = $sql;	
+						
+		} else {
+			$query = $sql." LIMIT $posisi, $batas";
+			$queryJml = $_sql;
+			$no = $posisi * 1;
+		}			
+	}else {
+		$query = $_sql." LIMIT $posisi, $batas";
+		$queryJml = $_sql;
+		$no = $posisi * 1;
+	}
+	// menjlankan query berdasarakan sql diatas
+	$q_tampil_transaksi_peminjaman = mysqli_query(getConnection(), $query);
+
+	if(mysqli_num_rows($q_tampil_transaksi_peminjaman)>0)
+	{
+		while($r_tampil_transaksi_peminjaman=mysqli_fetch_array($q_tampil_transaksi_peminjaman))
+		{
+			/*if(empty($r_tampil_transaksi_peminjaman['foto']) or ($r_tampil_transaksi_peminjaman['foto']=='-'))
+			{
+				$newfoto = "admin-no-photo.jpg";
+			}else{
+				$newfoto = $r_tampil_transaksi_peminjaman['foto'];
+			}*/
+
+			echo "<tr>";
+			echo "<td>" . $nomor . "</td>";
+			//echo "<td><img src=images/$newfoto class='rounded-circle' width=70px height=70px></td>";
+			echo "<td>" . strtoupper($r_tampil_transaksi_peminjaman['namaanggota']) . "</td>";
+			echo "<td>" . strtoupper($r_tampil_transaksi_peminjaman['judulbuku']) . "</td>";
+			echo "<td>" . strtoupper($r_tampil_transaksi_peminjaman['tglpinjam']) . "</td>";
+			echo "<td>" . strtoupper($r_tampil_transaksi_peminjaman['tglkembali']) . "</td>";
+			echo "<td>" . strtoupper($r_tampil_transaksi_peminjaman['status']) . "</td>";
+			echo "<td>";
+			
+			echo "<div class='btn-group btn-group-sm'>";
+			//echo "<a href=pages/cetak_kartu.php?id=$r_tampil_transaksi_peminjaman[idbuku]  target=_blank class='btn btn-outline-info' role='button'>Cetak Buku</a>";
+
+			echo "<a href=index.php?p=transaksi-peminjaman-edit&id=$r_tampil_transaksi_peminjaman[idbuku]&hal=$hal class='btn btn-outline-success' role='button'>Edit</a>";
+			
+			echo "<a href=proses/transaksi-peminjaman-hapus.php?id=$r_tampil_transaksi_peminjaman[idbuku] onclick =\"return confirm ('Apakah Anda Yakin Akan Menghapus Data Ini?');\" class='btn btn-outline-danger' role='button'>Hapus</a>";
+			echo "</div>";
+
+			echo "</td>";			
+			echo "</tr>";		
+		
+			$nomor++; 
+		} 
+	}else {
+		echo "<tr><td colspan=6>Data Tidak Ditemukan</td></tr>";
+	}
+
+	echo "</tbody>";
+	echo "</table>";
+
+	// akhir tampil data
+	if(isset($_POST['pencarian']))
+	{
+		if($_POST['pencarian']!=''){
+			echo "<div style=\"float:left;\">";
+			$jml = mysqli_num_rows(mysqli_query(getConnection(), $queryJml));
+			echo "Data Hasil Pencarian: <b>$jml</b>";
+			echo "</div>";
+		}
+
+	}else{
+	
+		echo "<div class='container-fluid'>";
+		echo "<div class='row'>";
+		echo "<div class='col'>";
+		echo "<div class='text-left'>";		
+		$jml = mysqli_num_rows(mysqli_query(getConnection(), $queryJml));
+		echo "Jumlah Data : <b>$jml</b>";
+		echo "</div>";	
+		echo "</div>";
+
+		echo "<div class='col'>";
+		echo "<div class='pagination'>";
+		$jml_hal = ceil($jml/$batas);
+		echo "<ul class='float-right pagination'>";
+		for($i=1; $i<=$jml_hal; $i++){
+			if($i != $hal){
+				echo "<li class='page-item'>";
+				echo "<a class='page-link' href=\"?p=transaksi-peminjaman&hal=$i\">$i</a>";
+				echo "</a>";
+			}else {
+				echo "<li class='page-item active'>";
+				echo "<a class='page-link'>$i</a>";
+				echo "</li>";
+			}
+		}
+		echo "</ul>";
+		echo "</div>";
+		echo "</div>";
+		echo "</div>";
+		echo "</div>";
+	}
+}
 function getLayoutPrint ()
 {	
 	$nomor=1;

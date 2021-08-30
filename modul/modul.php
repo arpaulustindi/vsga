@@ -447,7 +447,7 @@ function getTampilTransaksiPeminjaman($pg, $req)
 				WHERE
 					a.idanggota = (SELECT t.idanggota)
 					AND
-					b.idbuku = (SELECT b.idbuku)";
+					b.idbuku = (SELECT t.idbuku)";
 	if($req == "POST")
 	{
 		$pencarian = trim(mysqli_real_escape_string(getConnection(), htmlentities($_POST['pencarian'], ENT_QUOTES)));
